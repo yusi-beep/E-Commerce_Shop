@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>Продукти</h1>
+<details>
+  <summary>Категории</summary>
+  <ul>
+    <li><a href="/">Всички</a></li>
+    {% for c in categories %}
+      <li><a href="/?c={{ c.slug }}">{{ c.name }}</a></li>
+    {% endfor %}
+  </ul>
+</details>
+
+<div class="grid">
+{% for p in products %}
+  <article>
+    {% if p.image %}<img src="{{ p.image.url }}" alt="{{ p.name }}" />{% endif %}
+    <h3>
+      <a href="{{ p.get_absolute_url }}">{{ p.name }}</a>
+      {% if p.discount_percent %}<span class="badge">-{{ p.discount_percent }}%</span>{% endif %}
+    </h3>
+
+    {% if p.old_price %}
+      <p><small class="contrast"><s>{{ p.old_price }} лв</s>
+      {% if p.old_price_eur %} ({{ p.old_price_eur }} €){% endif %}</small></p>
+    {% endif %}
+
+    <p><strong>{{ p.price }} лв</strong>
+      {% if p.price_eur %} <small>({{ p.price_eur }} €)</small>{% endif %}
+    </p>
+
+    <form action="/cart/add/{{ p.id }}/" method="post">
+      {% csrf_token %}
+      <input type="number" name="qty" value="1" min="1">
+      <button type="submit">Добави</button>
+    </form>
+  </article>
+{% empty %}
+  <p>Няма продукти.</p>
+{% endfor %}
+</div>
+{% endblock %}

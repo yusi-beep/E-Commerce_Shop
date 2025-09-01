@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+{% block content %}
+  <article>
+    <h1>{{ product.name }} {% if product.discount_percent %}<span class="badge">-{{ product.discount_percent }}%</span>{% endif %}</h1>
+    {% if product.image %}<img src="{{ product.image.url }}" alt="{{ product.name }}" />{% endif %}
+
+    {% if product.old_price and product.old_price > product.price %}
+      <span style="background:#e63946; color:white; padding:3px 8px; border-radius:4px; font-size:0.9em;">-
+        {{ ((product.old_price - product.price) / product.old_price * 100)|floatformat:0 }}%
+      </span>
+    {% endif %}
+
+    {% if product.old_price %}
+      <p><small class="contrast"><s>{{ product.old_price }} лв</s>
+        {% if product.old_price_eur %} ({{ product.old_price_eur }} €){% endif %}
+      </small></p>
+    {% endif %}
+
+    <p>Цена: <strong>{{ product.price }} лв</strong>
+      {% if product.price_eur %} <small>({{ product.price_eur }} €)</small>{% endif %}
+    </p>
+
+    <p>Наличност: {{ product.stock }}</p>
+    <form action="/cart/add/{{ product.id }}/" method="post">
+      {% csrf_token %}
+      <input type="number" name="qty" value="1" min="1">
+      <button type="submit">Добави в количката</button>
+    </form>
+  </article>
+{% endblock %}
+```html
+{% extends 'base.html' %}
+{% block content %}
+  <article>
+    <h1>{{ product.name }}</h1>
+    {% if product.image %}<img src="{{ product.image.url }}" alt="{{ product.name }}" />{% endif %}
+
+    {# Стара цена – показва се преди текущата, по-малък шрифт и зачеркната #}
+    {% if product.old_price %}
+      <p><small class="contrast"><s>{{ product.old_price }} лв</s>
+        {% if product.old_price_eur %} ({{ product.old_price_eur }} €){% endif %}
+      </small></p>
+    {% endif %}
+
+    {# Текуща цена + евро изчисление автоматично по 1.95583 #}
+    <p>Цена: <strong>{{ product.price }} лв</strong>
+      {% if product.price_eur %} <small>({{ product.price_eur }} €)</small>{% endif %}
+    </p>
+
+    <p>Наличност: {{ product.stock }}</p>
+    <form action="/cart/add/{{ product.id }}/" method="post">
+      {% csrf_token %}
+      <input type="number" name="qty" value="1" min="1">
+      <button type="submit">Добави в количката</button>
+    </form>
+  </article>
+{% endblock %}

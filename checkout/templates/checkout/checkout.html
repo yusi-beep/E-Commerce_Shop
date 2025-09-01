@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>Поръчка</h1>
+<p>Общо за плащане: <strong>{{ cart_total }} лв</strong></p>
+<form method="post">
+  {% csrf_token %}
+  {{ form.as_p }}
+  <button type="submit">Завърши поръчката</button>
+</form>
+{% endblock %}

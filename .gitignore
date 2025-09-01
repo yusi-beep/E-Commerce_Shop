@@ -1,0 +1,34 @@
+# Виртуална среда
+venv/
+ENV/
+.venv/
+
+# Python кешове
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pyc
+
+# SQLite база (ако не искаш да я версионираш)
+db.sqlite3
+
+# Django миграции (само ако искаш да са локални – иначе може да ги държиш в git)
+# */migrations/*.py
+# !*/migrations/__init__.py
+
+# Медийни файлове (качени от потребители)
+media/
+
+# Статични файлове, генерирани с collectstatic
+staticfiles/
+
+# Настройки/секрети
+*.env
+.env
+.DS_Store
+
+# IDE / редактори
+.vscode/
+.idea/
+*.swp
