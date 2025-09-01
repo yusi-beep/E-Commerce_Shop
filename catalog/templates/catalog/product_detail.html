@@ -16,6 +16,26 @@
       </small></p>
     {% endif %}
 
+    {% if product.variants.all %}
+      <form action="/cart/add/{{ product.id }}/" method="post">
+        {% csrf_token %}
+        <label>Размер</label>
+        <select name="size">
+          {% for v in product.variants.all %}
+            {% if v.size %}<option value="{{ v.size }}">{{ v.size }}</option>{% endif %}
+          {% endfor %}
+        </select>
+        <label>Цвят</label>
+        <select name="color">
+          {% for v in product.variants.all %}
+            {% if v.color %}<option value="{{ v.color }}">{{ v.color }}</option>{% endif %}
+          {% endfor %}
+        </select>
+        <input type="number" name="qty" value="1" min="1">
+        <button type="submit">Добави</button>
+      </form>
+    {% endif %}
+
     <p>Цена: <strong>{{ product.price }} лв</strong>
       {% if product.price_eur %} <small>({{ product.price_eur }} €)</small>{% endif %}
     </p>

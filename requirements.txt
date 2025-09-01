@@ -1,0 +1,9 @@
+Django>=5.0
+Pillow
+stripe
+boto3
+django-storages
+psycopg2-binary
+dj-database-url
+pytest
+pytest-django

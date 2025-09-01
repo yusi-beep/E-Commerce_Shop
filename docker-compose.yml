@@ -1,0 +1,35 @@
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: shop
+      POSTGRES_USER: shop
+      POSTGRES_PASSWORD: shop
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  web:
+    build: .
+    command: python manage.py runserver 0.0.0.0:8000
+    ports:
+      - "8000:8000"
+    environment:
+      DJANGO_SECRET_KEY: dev
+      DEBUG: "1"
+      # Ако искаш Django да ползва Postgres вместо SQLite, активирай реда долу
+      # и добави dj-database-url в shop/settings.py както е описано:
+      # import dj_database_url, os
+      # DATABASES = {'default': dj_database_url.parse(os.getenv('DATABASE_URL', ''), conn_max_age=600, ssl_require=False) } if os.getenv('DATABASE_URL') else DATABASES
+      # Това остава тук горното се добавя в shop/settings.py
+      # DATABASE_URL: postgres://shop:shop@db:5432/shop
+      SITE_URL: http://localhost:8000
+      USE_S3: "0"
+    volumes:
+      - .:/app
+    depends_on:
+      - db
+
+volumes:
+  pgdata:
