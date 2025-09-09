@@ -1,0 +1,15 @@
+Здравейте, {{ order.full_name }}!
+
+Получихме успешно плащане за вашата поръчка №{{ order.id }} от {{ order.created_at|date:"d.m.Y H:i" }}.
+
+Сума: {{ order.total }} лв
+Статус: {{ order.get_status_display }}
+
+Детайли:
+{% for it in order.items.all %}
+ - {{ it.product_name }} x{{ it.qty }} — {{ it.unit_price }} лв (общо {{ it.line_total }} лв)
+{% endfor %}
+
+Ще ви уведомим, когато поръчката бъде изпратена.
+Поздрави,
+Екипът на магазина

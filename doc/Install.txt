@@ -1,0 +1,4 @@
+pip install "django>=5.0" pillow
+pip install django-storages boto3
+pip install stripe
+pip install pytest pytest-django

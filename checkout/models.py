@@ -2,6 +2,13 @@ from django.db import models
 from django.utils import timezone
 
 class Order(models.Model):
+    class Status(models.TextChoices):
+        NEW = 'NEW', 'Нова'
+        PAID = 'PAID', 'Платена'
+        FULFILLED = 'FULFILLED', 'Изпълнена'
+        CANCELED = 'CANCELED', 'Отменена'
+        REFUNDED = 'REFUNDED', 'Възстановена'
+
     created_at = models.DateTimeField(auto_now_add=True)
     email = models.EmailField()
     full_name = models.CharField(max_length=120)
@@ -9,10 +16,17 @@ class Order(models.Model):
     phone = models.CharField(max_length=32, blank=True)
     paid = models.BooleanField(default=False)
     total = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-    # по желание: user = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name='orders')
+    status = models.CharField(max_length=20, choices=Status.choices, default=Status.NEW)
 
     def __str__(self):
-        return f"Order #{self.id} - {self.full_name}"
+        return f"Order #{self.id} - {self.full_name} ({self.get_status_display()})"
+
+    def set_status(self, new_status: str, save=True):
+        self.status = new_status
+        if new_status == self.Status.PAID:
+            self.paid = True
+        if save:
+            self.save(update_fields=['status', 'paid'])
 
 class OrderItem(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='items')

@@ -51,3 +51,15 @@ class Product(models.Model):
             pct = (Decimal(self.old_price) - Decimal(self.price)) / Decimal(self.old_price) * Decimal('100')
             return pct.quantize(Decimal('1'), rounding=ROUND_HALF_UP)
         return None
+        
+class ProductVariant(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='variants')
+    sku = models.CharField(max_length=64, unique=True)
+    size = models.CharField(max_length=32, blank=True)
+    color = models.CharField(max_length=32, blank=True)
+    price = models.DecimalField(max_digits=10, decimal_places=2)
+    stock = models.PositiveIntegerField(default=0)
+
+    def __str__(self):
+        attrs = ", ".join(a for a in [self.size, self.color] if a)
+        return f"{self.product.name} [{attrs or self.sku}]"

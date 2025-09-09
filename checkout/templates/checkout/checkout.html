@@ -1,10 +1,19 @@
 {% extends 'base.html' %}
 {% block content %}
 <h1>Поръчка</h1>
+
+{% if error %}<p class="contrast">{{ error }}</p>{% endif %}
+
 <form method="post">
   {% csrf_token %}
   {{ form.as_p }}
+
   <p>Общо за плащане (преди доставка): <strong>{{ cart_total }} лв</strong></p>
-  <button type="submit">Към плащане</button>
+
+  <button type="submit">Потвърди поръчката</button>
 </form>
+
+{% if not stripe_pk %}
+  <p><small>Плащане с карта е временно недостъпно (няма конфигурирани Stripe ключове).</small></p>
+{% endif %}
 {% endblock %}

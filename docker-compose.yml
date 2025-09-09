@@ -33,3 +33,5 @@ services:
 
 volumes:
   pgdata:
+
+# За прод използвай Gunicorn и `collectstatic` + подходящ reverse proxy (Nginx/Cloud).
