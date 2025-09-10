@@ -16,5 +16,9 @@ def product_list(request):
     })
 
 def product_detail(request, slug):
-    product = get_object_or_404(Product, slug=slug, active=True)
+    product = get_object_or_404(
+        Product.objects.prefetch_related('images'),
+        slug=slug,
+        active=True
+    )
     return render(request, 'catalog/product_detail.html', {'product': product})

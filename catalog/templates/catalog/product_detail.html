@@ -1,53 +1,109 @@
 {% extends 'base.html' %}
 {% block content %}
-  <article>
-    <h1>
-      {{ product.name }}
-      {% if product.discount_percent %}
-        <span class="badge">-{{ product.discount_percent }}%</span>
-      {% endif %}
-    </h1>
+<article>
+  <h1>
+    {{ product.name }}
+    {% if product.discount_percent %}
+      <span class="badge">-{{ product.discount_percent }}%</span>
+    {% endif %}
+  </h1>
 
-    {% if product.image %}<img src="{{ product.image.url }}" alt="{{ product.name }}" />{% endif %}
+  <style>
+    .gallery { display:grid; grid-template-columns: 1fr; gap:1rem; max-width: 720px; }
+    .main-img { width:100%; max-height:480px; object-fit:contain; border:1px solid rgba(255,255,255,.1); border-radius:.5rem; }
+    .thumbs { display:flex; gap:.5rem; flex-wrap:wrap; }
+    .thumbs img { width:96px; height:96px; object-fit:cover; border:2px solid transparent; border-radius:.4rem; cursor:pointer; }
+    .thumbs img.active { border-color:#0d6efd; }
+  </style>
 
-    {% if product.old_price %}
-      <p>
-        <small class="contrast">
-          <s>{{ product.old_price }} лв</s>
-          <s>{% if product.old_price_eur %} ({{ product.old_price_eur }} €){% endif %}</s>
-        </small>
-      </p>
+  <div class="gallery">
+    {# --- ГЛАВНА СНИМКА (без lazy) --- #}
+    {% if product.image %}
+      <picture>
+        {% if product.image_avif %}<source srcset="{{ product.image_avif.url }}" type="image/avif">{% endif %}
+        {% if product.image_webp %}<source srcset="{{ product.image_webp.url }}" type="image/webp">{% endif %}
+        <img id="mainImg"
+             class="main-img"
+             src="{{ product.image.url }}"
+             alt="{{ product.name }}"
+             {% if product.image.width and product.image.height %}width="{{ product.image.width }}" height="{{ product.image.height }}"{% endif %}
+             fetchpriority="high">
+      </picture>
     {% endif %}
 
-    <p>Цена: <strong>{{ product.price }} лв</strong>
-      {% if product.price_eur %} <small>({{ product.price_eur }} €)</small>{% endif %}
-    </p>
-
-    <p>Наличност: {{ product.stock }}</p>
-    <form action="/cart/add/{{ product.id }}/" method="post">
-      {% csrf_token %}
-      <input type="number" name="qty" value="1" min="1">
-
-      {% if product.variants.all %}
-        <form action="/cart/add/{{ product.id }}/" method="post">
-          {% csrf_token %}
-          <label>Размер</label>
-          <select name="size">
-            {% for v in product.variants.all %}
-              {% if v.size %}<option value="{{ v.size }}">{{ v.size }}</option>{% endif %}
-            {% endfor %}
-          </select>
-          <label>Цвят</label>
-          <select name="color">
-            {% for v in product.variants.all %}
-              {% if v.color %}<option value="{{ v.color }}">{{ v.color }}</option>{% endif %}
-            {% endfor %}
-          </select>
-          <input type="number" name="qty" value="1" min="1">
-          <button type="submit">Добави</button>
-        </form>
+    {# --- МИНИАТЮРИ (lazy) --- #}
+    <div class="thumbs">
+      {% if product.image %}
+        <picture>
+          {% if product.image_avif %}<source srcset="{{ product.image_avif.url }}" type="image/avif">{% endif %}
+          {% if product.image_webp %}<source srcset="{{ product.image_webp.url }}" type="image/webp">{% endif %}
+          <img
+            src="{{ product.image.url }}"
+            alt="{{ product.name }}"
+            class="thumb active"
+            loading="lazy" decoding="async" width="96" height="96"
+            data-full="{% if product.image_avif %}{{ product.image_avif.url }}{% elif product.image_webp %}{{ product.image_webp.url }}{% else %}{{ product.image.url }}{% endif %}">
+        </picture>
       {% endif %}
-      <button type="submit">Добави в количката</button>
-    </form>
-  </article>
+
+      {% for img in product.images.all %}
+        <picture>
+          {% if img.image_avif %}<source srcset="{{ img.image_avif.url }}" type="image/avif">{% endif %}
+          {% if img.image_webp %}<source srcset="{{ img.image_webp.url }}" type="image/webp">{% endif %}
+          <img
+            {% if img.image_avif %}
+              src="{{ img.image_avif.url }}"
+            {% elif img.image_webp %}
+              src="{{ img.image_webp.url }}"
+            {% else %}
+              src="{{ img.image.url }}"
+            {% endif %}
+            alt="{{ img.alt_text|default:product.name }}"
+            class="thumb"
+            loading="lazy" decoding="async" width="96" height="96"
+            data-full="{% if img.image_avif %}{{ img.image_avif.url }}{% elif img.image_webp %}{{ img.image_webp.url }}{% else %}{{ img.image.url }}{% endif %}">
+        </picture>
+      {% endfor %}
+    </div>
+  </div>
+
+  {% if product.old_price %}
+    <p>
+      <small class="contrast">
+        <s>{{ product.old_price }} лв</s>
+        {% if product.old_price_eur %} <s>({{ product.old_price_eur }} €)</s>{% endif %}
+      </small>
+    </p>
+  {% endif %}
+
+  <p>Цена: <strong>{{ product.price }} лв</strong>
+    {% if product.price_eur %} <small>({{ product.price_eur }} €)</small>{% endif %}
+  </p>
+
+  <p>Наличност: {{ product.stock }}</p>
+
+  <form action="{% url 'cart_add' product.id %}" method="post" style="display:grid; gap:.5rem; max-width:420px;">
+    {% csrf_token %}
+    <label for="qty">Количество</label>
+    <input id="qty" type="number" name="qty" value="1" min="1">
+    <button type="submit" class="btn">Добави в количката</button>
+  </form>
+
+  <p style="margin-top:1rem;"><a href="/">← Обратно към продуктите</a></p>
+
+  <script>
+    // Смяна на главната снимка при клик на миниатюра
+    const main = document.getElementById('mainImg');
+    document.querySelectorAll('.thumbs img').forEach(th => {
+      th.addEventListener('click', () => {
+        document.querySelectorAll('.thumbs img').forEach(x => x.classList.remove('active'));
+        th.classList.add('active');
+        if (main && th.dataset.full) {
+          main.src = th.dataset.full;
+          main.alt = th.alt || "{{ product.name|escapejs }}";
+        }
+      });
+    });
+  </script>
+</article>
 {% endblock %}

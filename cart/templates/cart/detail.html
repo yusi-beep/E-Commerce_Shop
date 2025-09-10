@@ -1,0 +1,88 @@
+{% extends 'base.html' %}
+{% block content %}
+<article>
+  <h1>
+    {{ product.name }}
+    {% if product.discount_percent %}
+      <span class="badge">-{{ product.discount_percent }}%</span>
+    {% endif %}
+  </h1>
+  <style>
+    .gallery { display:grid; grid-template-columns: 1fr; gap:1rem; max-width: 720px; }
+    .main-img { width:100%; max-height:480px; object-fit:contain; border:1px solid rgba(255,255,255,.1); border-radius:.5rem; }
+    .thumbs { display:flex; gap:.5rem; flex-wrap:wrap; }
+    .thumbs img { width:96px; height:96px; object-fit:cover; border:2px solid transparent; border-radius:.4rem; cursor:pointer; }
+    .thumbs img.active { border-color:#0d6efd; }
+  </style>
+
+  <div class="gallery">
+    <img id="mainImg"
+         class="main-img"
+         src="{{ product.image.url if product.image else '' }}"
+         alt="{{ product.name }}">
+    <div class="thumbs">
+      {% if product.image %}
+        <img src="{{ product.image.url }}" alt="{{ product.name }}" data-full="{{ product.image.url }}" class="active">
+      {% endif %}
+      {% for img in product.images.all %}
+        <img src="{{ img.image.url }}" alt="{{ img.alt_text|default:product.name }}" data-full="{{ img.image.url }}">
+      {% endfor %}
+    </div>
+  </div>
+
+  {% if product.old_price %}
+    <p>
+      <small class="contrast">
+        <s>{{ product.old_price }} лв</s>
+        {% if product.old_price_eur %} <s>({{ product.old_price_eur }} €)</s>{% endif %}
+      </small>
+    </p>
+  {% endif %}
+
+  <p>Цена: <strong>{{ product.price }} лв</strong>
+    {% if product.price_eur %} <small>({{ product.price_eur }} €)</small>{% endif %}
+  </p>
+
+  <p>Наличност: {{ product.stock }}</p>
+
+  <form action="{% url 'cart_add' product.id %}" method="post" style="display:grid; gap:.5rem; max-width:420px;">
+    {% csrf_token %}
+
+    {% if product.variants.all %}
+      <label for="size">Размер</label>
+      <select name="size" id="size">
+        {% for v in product.variants.all %}
+          {% if v.size %}<option value="{{ v.size }}">{{ v.size }}</option>{% endif %}
+        {% endfor %}
+      </select>
+
+      <label for="color">Цвят</label>
+      <select name="color" id="color">
+        {% for v in product.variants.all %}
+          {% if v.color %}<option value="{{ v.color }}">{{ v.color }}</option>{% endif %}
+        {% endfor %}
+      </select>
+    {% endif %}
+
+    <label for="qty">Количество</label>
+    <input id="qty" type="number" name="qty" value="1" min="1">
+
+    <button type="submit" class="btn">Добави в количката</button>
+  </form>
+
+  <p style="margin-top:1rem;"><a href="/">← Обратно към продуктите</a></p>
+
+  <script>
+    // Галерия: смяна на главната снимка при клик
+    const main = document.getElementById('mainImg');
+    document.querySelectorAll('.thumbs img').forEach(th => {
+      th.addEventListener('click', () => {
+        document.querySelectorAll('.thumbs img').forEach(x => x.classList.remove('active'));
+        th.classList.add('active');
+        main.src = th.dataset.full;
+        main.alt = th.alt || "{{ product.name }}";
+      });
+    });
+  </script>
+</article>
+{% endblock %}

@@ -10,6 +10,7 @@ from django.template.loader import render_to_string
 from .models import Order, OrderItem, Coupon
 from .forms import CheckoutForm
 from cart.cart import Cart
+from catalog.models import Product
 
 # Stripe е опционален
 try:
@@ -58,8 +59,10 @@ def checkout_view(request):
                 )
                 line_items = []
                 for i in cart:
+                    product_obj = Product.objects.filter(id=i['id']).first()
                     OrderItem.objects.create(
                         order=order,
+                        product=product_obj,
                         product_name=i['name'],
                         unit_price=i['price'],
                         qty=i['qty'],
@@ -70,8 +73,15 @@ def checkout_view(request):
                         'qty': int(i['qty']),
                     })
 
+
             # Ако е наложен платеж → без Stripe
             if payment_method == 'cod' or not settings.USE_STRIPE:
+                # намаляване на наличности
+                for it in order.items.select_related('product'):
+                    if it.product:
+                        it.product.stock = max(0, int(it.product.stock) - int(it.qty))
+                        it.product.save(update_fields=['stock'])
+
                 # (по желание) изпрати имейл „получена поръчка“
                 try:
                     subject = f"Получена поръчка №{order.id}"
@@ -162,6 +172,10 @@ def stripe_webhook(request):
         coupon_code = data.get('metadata', {}).get('coupon_code')
 
         if order_id:
+            for it in order.items.select_related('product'):
+                if it.product:
+                    it.product.stock = max(0, int(it.product.stock) - int(it.qty))
+                    it.product.save(update_fields=['stock'])
             try:
                 order = Order.objects.get(id=order_id)
                 order.set_status(Order.Status.PAID)

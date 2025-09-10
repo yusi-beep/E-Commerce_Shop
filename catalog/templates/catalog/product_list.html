@@ -35,7 +35,7 @@
       {% if p.price_eur %} <small>({{ p.price_eur }} €)</small>{% endif %}
     </p>
 
-    <form action="/cart/add/{{ p.id }}/" method="post">
+    <form action="{% url 'cart_add' p.id %}" method="post">
       {% csrf_token %}
       <input type="number" name="qty" value="1" min="1">
       <button type="submit">Добави</button>

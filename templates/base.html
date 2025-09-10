@@ -25,5 +25,15 @@
   <main class="container">
     {% block content %}{% endblock %}
   </main>
+  {% if messages %}
+  <div class="container">
+      <ul>
+        {% for message in messages %}
+          <li class="{{ message.tags }}">{{ message }}</li>
+        {% endfor %}
+      </ul>
+    </div>
+  {% endif %}
+
 </body>
 </html>
