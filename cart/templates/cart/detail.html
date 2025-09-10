@@ -1,88 +1,92 @@
 {% extends 'base.html' %}
 {% block content %}
-<article>
-  <h1>
-    {{ product.name }}
-    {% if product.discount_percent %}
-      <span class="badge">-{{ product.discount_percent }}%</span>
-    {% endif %}
-  </h1>
+<h1>Количка</h1>
+
+{% if messages %}
+  <ul>
+    {% for message in messages %}
+      <li class="{{ message.tags }}">{{ message }}</li>
+    {% endfor %}
+  </ul>
+{% endif %}
+
+{% if items and items|length %}
   <style>
-    .gallery { display:grid; grid-template-columns: 1fr; gap:1rem; max-width: 720px; }
-    .main-img { width:100%; max-height:480px; object-fit:contain; border:1px solid rgba(255,255,255,.1); border-radius:.5rem; }
-    .thumbs { display:flex; gap:.5rem; flex-wrap:wrap; }
-    .thumbs img { width:96px; height:96px; object-fit:cover; border:2px solid transparent; border-radius:.4rem; cursor:pointer; }
-    .thumbs img.active { border-color:#0d6efd; }
+    .btn{display:inline-block;padding:.7rem 1.2rem;border-radius:.6rem;border:0;background:#0d6efd;color:#fff;text-decoration:none;cursor:pointer}
+    .btn:hover{filter:brightness(1.1)}
+    .btn-danger{background:#dc3545}
+    table{width:100%;border-collapse:collapse}
+    th,td{padding:.9rem 1rem;border-bottom:1px solid rgba(255,255,255,.08)}
+    td form{margin:0}
+    .qty-input{width:6rem;padding:.4rem .6rem;border-radius:.5rem;border:1px solid rgba(255,255,255,.2);background:transparent;color:inherit}
+    .prod{display:flex;gap:.75rem;align-items:center}
+    .thumb{width:48px;height:48px;object-fit:cover;border-radius:.35rem;border:1px solid rgba(255,255,255,.15)}
   </style>
 
-  <div class="gallery">
-    <img id="mainImg"
-         class="main-img"
-         src="{{ product.image.url if product.image else '' }}"
-         alt="{{ product.name }}">
-    <div class="thumbs">
-      {% if product.image %}
-        <img src="{{ product.image.url }}" alt="{{ product.name }}" data-full="{{ product.image.url }}" class="active">
-      {% endif %}
-      {% for img in product.images.all %}
-        <img src="{{ img.image.url }}" alt="{{ img.alt_text|default:product.name }}" data-full="{{ img.image.url }}">
-      {% endfor %}
-    </div>
-  </div>
+  <table>
+    <thead>
+      <tr>
+        <th>Продукт</th>
+        <th>Цена</th>
+        <th>Количество</th>
+        <th>Общо</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+    {% for i in items %}
+      <tr>
+        <td>
+          <div class="prod">
+            {% if i.image_url %}
+              <img class="thumb" src="{{ i.image_url }}" alt="{{ i.name }}" loading="lazy" decoding="async" width="48" height="48">
+            {% endif %}
+            <a href="{% url 'product_detail' i.slug %}">{{ i.name }}</a>
+          </div>
+        </td>
+        <td>{{ i.price }} лв</td>
+        <td>
+          <form action="{% url 'cart_update' i.id %}" method="post" class="qty-form">
+            {% csrf_token %}
+            <input class="qty-input" type="number" name="qty" value="{{ i.qty }}" min="0" step="1">
+          </form>
+        </td>
+        <td>{{ i.line_total }} лв</td>
+        <td>
+          <form action="{% url 'cart_remove' i.id %}" method="post">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger">Премахни</button>
+          </form>
+        </td>
+      </tr>
+    {% endfor %}
+    </tbody>
+    <tfoot>
+      <tr>
+        <td colspan="3" style="text-align:right;">Общо:</td>
+        <td>{{ total }} лв</td>
+        <td></td>
+      </tr>
+    </tfoot>
+  </table>
 
-  {% if product.old_price %}
-    <p>
-      <small class="contrast">
-        <s>{{ product.old_price }} лв</s>
-        {% if product.old_price_eur %} <s>({{ product.old_price_eur }} €)</s>{% endif %}
-      </small>
-    </p>
-  {% endif %}
-
-  <p>Цена: <strong>{{ product.price }} лв</strong>
-    {% if product.price_eur %} <small>({{ product.price_eur }} €)</small>{% endif %}
+  <p style="margin-top:1rem; display:flex; gap:.5rem;">
+    <a href="/" class="btn btn-link">← Продължи пазаруването</a>
+    <a href="{% url 'checkout_view' %}" class="btn">Към поръчката</a>
   </p>
 
-  <p>Наличност: {{ product.stock }}</p>
-
-  <form action="{% url 'cart_add' product.id %}" method="post" style="display:grid; gap:.5rem; max-width:420px;">
-    {% csrf_token %}
-
-    {% if product.variants.all %}
-      <label for="size">Размер</label>
-      <select name="size" id="size">
-        {% for v in product.variants.all %}
-          {% if v.size %}<option value="{{ v.size }}">{{ v.size }}</option>{% endif %}
-        {% endfor %}
-      </select>
-
-      <label for="color">Цвят</label>
-      <select name="color" id="color">
-        {% for v in product.variants.all %}
-          {% if v.color %}<option value="{{ v.color }}">{{ v.color }}</option>{% endif %}
-        {% endfor %}
-      </select>
-    {% endif %}
-
-    <label for="qty">Количество</label>
-    <input id="qty" type="number" name="qty" value="1" min="1">
-
-    <button type="submit" class="btn">Добави в количката</button>
-  </form>
-
-  <p style="margin-top:1rem;"><a href="/">← Обратно към продуктите</a></p>
-
   <script>
-    // Галерия: смяна на главната снимка при клик
-    const main = document.getElementById('mainImg');
-    document.querySelectorAll('.thumbs img').forEach(th => {
-      th.addEventListener('click', () => {
-        document.querySelectorAll('.thumbs img').forEach(x => x.classList.remove('active'));
-        th.classList.add('active');
-        main.src = th.dataset.full;
-        main.alt = th.alt || "{{ product.name }}";
-      });
+    // авто-обновяване при промяна на количество
+    const debounce = (fn, ms=400) => { let t; return (...a)=>{clearTimeout(t); t=setTimeout(()=>fn(...a),ms);} };
+    document.querySelectorAll('.qty-input').forEach(input => {
+      const submit = debounce(() => input.form.requestSubmit(), 350);
+      input.addEventListener('input', submit);
+      input.addEventListener('change', () => input.form.requestSubmit());
     });
   </script>
-</article>
+
+{% else %}
+  <p>Количката е празна.</p>
+  <p><a class="btn" href="/">Към продуктите</a></p>
+{% endif %}
 {% endblock %}
