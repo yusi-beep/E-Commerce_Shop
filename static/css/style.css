@@ -1,0 +1,45 @@
+body {
+  font-family: "Segoe UI", sans-serif;
+  margin: 0;
+  background: #fafafa;
+  color: #222;
+}
+
+.site-footer{
+  background:#f3f3f3; color:#222; margin-top:3rem; border-top:3px solid #d83b3b;
+  font-size:15px
+}
+.site-footer a{ color:#666; text-decoration:none }
+.site-footer a:hover{ color:#000; text-decoration:underline }
+.site-footer h3{ font-size:1.1rem; margin:.5rem 0 1rem; color:#111; letter-spacing:.02em }
+.footer-top{
+  display:grid; gap:2rem; grid-template-columns: repeat(12,1fr);
+  padding:2.2rem min(5vw,48px)
+}
+.footer-col{ grid-column: span 4 }
+.footer-col ul{ list-style:none; margin:0; padding:0 }
+.footer-col li{ margin:.55rem 0 }
+.social{ display:flex; flex-direction:column; gap:.6rem; margin-top:.4rem }
+.icon-link{ display:flex; align-items:center; gap:.5rem; color:#333 }
+.icon-link svg{ opacity:.9 }
+.footer-bottom{
+  display:flex; justify-content:space-between; align-items:center;
+  padding: .7rem min(5vw,48px); background:#eee; border-top:1px solid #e0e0e0; font-size:14px
+}
+.locale{ display:flex; align-items:center; gap:.4rem; color:#444 }
+.caret{ font-size:.9rem; opacity:.7 }
+
+/* тъмен режим — опционално */
+@media (prefers-color-scheme: dark){
+  .site-footer{ background:#121316; color:#d9d9d9; border-top-color:#bb2d2d }
+  .site-footer a{ color:#c3c7cd } .site-footer a:hover{ color:#fff }
+  .footer-bottom{ background:#0f1013; border-top-color:#191b20 }
+  .icon-link{ color:#e3e3e3 }
+}
+
+/* мобилен */
+@media (max-width: 900px){
+  .footer-col{ grid-column: span 12 }
+  .social{ flex-direction:row; flex-wrap:wrap }
+}
+

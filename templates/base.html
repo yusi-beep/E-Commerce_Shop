@@ -1,10 +1,15 @@
+{% load static %}
+
 <!doctype html>
 <html lang="bg">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Магазин</title>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css">
+  <title>{% block title %}Магазин{% endblock %}</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="stylesheet" href="{% static 'css/shop.css' %}">
+  {% block extra_head %}{% endblock %}
   <style>
     .badge { display:inline-block; padding:0.15rem 0.5rem; border-radius:9999px; font-size:0.8rem; background:#e53935; color:#fff; }
     .price-row { display:flex; gap:0.5rem; align-items:baseline; }
@@ -22,7 +27,7 @@
       <li><a href="/admin/">Админ</a></li>
     </ul>
   </nav>
-  <main class="container">
+  <main class="container" style="padding-top:.75rem; padding-bottom:1.25rem;">
     {% block content %}{% endblock %}
   </main>
   {% if messages %}
@@ -34,6 +39,63 @@
       </ul>
     </div>
   {% endif %}
+  <footer class="site-footer">
+    <div class="footer-top">
+      <div class="footer-col">
+        <h3>ИНФОРМАЦИЯ</h3>
+        <ul>
+          <li><a href="#">Нашите цени в евро</a></li>
+          <li><a href="#">За нас</a></li>
+          <li><a href="#">Общи Условия</a></li>
+          <li><a href="#">Политика за лични данни</a></li>
+          <li><a href="#">Политика за използване на бисквитки</a></li>
+        </ul>
+      </div>
 
+      <div class="footer-col">
+        <h3>&nbsp;</h3>
+        <ul>
+          <li><a href="#">Другите за нас</a></li>
+          <li><a href="{% url 'checkout_view' %}">Поръчка и доставка</a></li>
+          <li><a href="#">Информация за поръчка</a></li>
+          <li><a href="#">Често задавани въпроси</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <h3>ИДЕИ ЗА ВАС</h3>
+        <ul>
+          <li><a href="#">Полезна Информация</a></li>
+        </ul>
+        <h3 style="margin-top:1.25rem;">ПОСЛЕДВАЙТЕ НИ</h3>
+        <div class="social">
+          <a href="#" aria-label="Facebook" class="icon-link">
+            <!-- FB SVG -->
+            <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path fill="currentColor" d="M22 12a10 10 0 1 0-11.5 9.9v-7h-2.7V12h2.7V9.7c0-2.7 1.6-4.2 4-4.2 1.1 0 2.2.2 2.2.2v2.4h-1.3c-1.3 0-1.7.8-1.7 1.6V12h2.9l-.5 2.9h-2.4v7A10 10 0 0 0 22 12"/></svg>
+            Facebook
+          </a>
+          <a href="#" aria-label="Instagram" class="icon-link">
+            <!-- IG SVG -->
+            <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path fill="currentColor" d="M7 2h10a5 5 0 0 1 5 5v10a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5V7a5 5 0 0 1 5-5Zm0 2a3 3 0 0 0-3 3v10a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3V7a3 3 0 0 0-3-3H7Zm5 3.5A5.5 5.5 0 1 1 6.5 13 5.5 5.5 0 0 1 12 7.5Zm0 2A3.5 3.5 0 1 0 15.5 13 3.5 3.5 0 0 0 12 9.5Zm6.25-2.75a1.25 1.25 0 1 1-1.25 1.25 1.25 1.25 0 0 1 1.25-1.25Z"/></svg>
+            Instagram
+          </a>
+          <a href="#" aria-label="YouTube" class="icon-link">
+            <!-- YT SVG -->
+            <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path fill="currentColor" d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.9 3.5 12 3.5 12 3.5s-7.9 0-9.4.6A3 3 0 0 0 .5 6.2 31.1 31.1 0 0 0 0 12a31.1 31.1 0 0 0 .6 5.8 3 3 0 0 0 2.1 2.1C4.1 20.5 12 20.5 12 20.5s7.9 0 9.4-.6a3 3 0 0 0 2.1-2.1A31.1 31.1 0 0 0 24 12a31.1 31.1 0 0 0-.5-5.8ZM9.5 15.5v-7l6 3.5-6 3.5Z"/></svg>
+            YouTube
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <div>© 2004 – {% now "Y" %} YosakaSoft. Всички права запазени.</div>
+      <div class="locale">
+        <img src="https://flagcdn.com/w20/bg.png" width="20" height="15" alt="BG" loading="lazy">
+        <span>Български</span>
+        <span class="caret">▾</span>
+      </div>
+    </div>
+  </footer>
 </body>
 </html>

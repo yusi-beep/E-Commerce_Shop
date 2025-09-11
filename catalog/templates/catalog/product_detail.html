@@ -70,14 +70,14 @@
   {% if product.old_price %}
     <p>
       <small class="contrast">
-        <s>{{ product.old_price }} лв</s>
-        {% if product.old_price_eur %} <s>({{ product.old_price_eur }} €)</s>{% endif %}
+        <s>{{ product.old_price }}лв</s>
+        {% if product.old_price_eur %} <s>({{ product.old_price_eur }}€)</s>{% endif %}
       </small>
     </p>
   {% endif %}
 
-  <p>Цена: <strong>{{ product.price }} лв</strong>
-    {% if product.price_eur %} <small>({{ product.price_eur }} €)</small>{% endif %}
+  <p>Цена: <strong>{{ product.price }}лв</strong>
+    {% if product.price_eur %} <small>({{ product.price_eur }}€)</small>{% endif %}
   </p>
 
   <p>Наличност: {{ product.stock }}</p>
