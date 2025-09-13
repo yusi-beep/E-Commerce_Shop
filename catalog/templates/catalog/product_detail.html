@@ -76,6 +76,13 @@
     </p>
   {% endif %}
 
+  {% if product.description %}
+    <div class="product-description">
+      <h3>Описание</h3>
+      <p>{{ product.description|linebreaks }}</p>
+    </div>
+  {% endif %}
+
   <p>Цена: <strong>{{ product.price }}лв</strong>
     {% if product.price_eur %} <small>({{ product.price_eur }}€)</small>{% endif %}
   </p>

@@ -30,6 +30,7 @@ class Product(models.Model):
     category = models.ForeignKey(Category, on_delete=models.PROTECT, related_name='products')
     name = models.CharField(max_length=120)
     slug = models.SlugField(unique=True)
+    description = models.TextField(blank=True, help_text="Product description")
     # Цени в лева (основна валута)
     price = models.DecimalField(max_digits=10, decimal_places=2)
     old_price = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)

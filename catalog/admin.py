@@ -45,7 +45,7 @@ class ProductAdmin(admin.ModelAdmin):
     inlines = [ProductImageInline]
     readonly_fields = ('image_webp', 'image_avif')
     fields = (
-        'name', 'slug', 'category', 'price', 'old_price', 'stock', 'active',
+        'name', 'slug', 'category', 'description', 'price', 'old_price', 'stock', 'active',
         'image', 'image_webp', 'image_avif',   # <- добавени тук за визуализация
         # добави и други полета, които имаш
     )
