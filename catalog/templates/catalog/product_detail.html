@@ -83,17 +83,68 @@
     </div>
   {% endif %}
 
-  <p>Цена: <strong>{{ product.price }}лв</strong>
-    {% if product.price_eur %} <small>({{ product.price_eur }}€)</small>{% endif %}
-  </p>
+  {% if product.variants.exists %}
+    <div class="product-variants" style="margin: 1.5rem 0; padding: 1rem; border: 1px solid var(--border); border-radius: var(--card-radius); background: var(--gradient-card);">
+      <h3 style="margin: 0 0 1rem 0; color: var(--accent);">Варианти</h3>
+      
+      {% regroup product.variants.all by size as size_variants %}
+      {% if size_variants|length > 1 or size_variants.0.grouper %}
+        <div style="margin-bottom: 1rem;">
+          <label for="size-select">Размер:</label>
+          <select id="size-select" style="margin-left: 0.5rem; padding: 0.5rem; border-radius: 8px;">
+            <option value="">Изберете размер</option>
+            {% for size_group in size_variants %}
+              {% if size_group.grouper %}
+                <option value="{{ size_group.grouper }}">{{ size_group.grouper }}</option>
+              {% endif %}
+            {% endfor %}
+          </select>
+        </div>
+      {% endif %}
 
-  <p>Наличност: {{ product.stock }}</p>
+      {% regroup product.variants.all by color as color_variants %}
+      {% if color_variants|length > 1 or color_variants.0.grouper %}
+        <div style="margin-bottom: 1rem;">
+          <label for="color-select">Цвят:</label>
+          <select id="color-select" style="margin-left: 0.5rem; padding: 0.5rem; border-radius: 8px;">
+            <option value="">Изберете цвят</option>
+            {% for color_group in color_variants %}
+              {% if color_group.grouper %}
+                <option value="{{ color_group.grouper }}">{{ color_group.grouper }}</option>
+              {% endif %}
+            {% endfor %}
+          </select>
+        </div>
+      {% endif %}
+
+      <div id="variant-info" style="display: none; margin-top: 1rem; padding: 1rem; background: rgba(37, 99, 235, 0.1); border-radius: 8px;">
+        <p><strong>SKU:</strong> <span id="variant-sku"></span></p>
+        <p><strong>Цена:</strong> <span id="variant-price"></span>лв</p>
+        <p><strong>Наличност:</strong> <span id="variant-stock"></span></p>
+      </div>
+    </div>
+
+    <div id="default-pricing" {% if product.variants.exists %}style="display: none;"{% endif %}>
+      <p>Цена: <strong>{{ product.price }}лв</strong>
+        {% if product.price_eur %} <small>({{ product.price_eur }}€)</small>{% endif %}
+      </p>
+      <p>Наличност: {{ product.stock }}</p>
+    </div>
+  {% else %}
+    <p>Цена: <strong>{{ product.price }}лв</strong>
+      {% if product.price_eur %} <small>({{ product.price_eur }}€)</small>{% endif %}
+    </p>
+    <p>Наличност: {{ product.stock }}</p>
+  {% endif %}
 
   <form action="{% url 'cart_add' product.id %}" method="post" style="display:grid; gap:.5rem; max-width:420px;">
     {% csrf_token %}
+    {% if product.variants.exists %}
+      <input type="hidden" name="variant_id" id="variant-id" value="">
+    {% endif %}
     <label for="qty">Количество</label>
     <input id="qty" type="number" name="qty" value="1" min="1">
-    <button type="submit" class="btn">Добави в количката</button>
+    <button type="submit" class="btn" id="add-to-cart-btn">Добави в количката</button>
   </form>
 
   <p style="margin-top:1rem;"><a href="/">← Обратно към продуктите</a></p>
@@ -111,6 +162,85 @@
         }
       });
     });
+
+    {% if product.variants.exists %}
+    // Данни за вариантите (JSON)
+    const variants = [
+      {% for variant in product.variants.all %}
+      {
+        id: {{ variant.id }},
+        sku: "{{ variant.sku|escapejs }}",
+        size: "{{ variant.size|escapejs }}",
+        color: "{{ variant.color|escapejs }}",
+        price: {{ variant.price }},
+        stock: {{ variant.stock }}
+      }{% if not forloop.last %},{% endif %}
+      {% endfor %}
+    ];
+
+    // Елементи за управление на вариантите
+    const sizeSelect = document.getElementById('size-select');
+    const colorSelect = document.getElementById('color-select');
+    const variantInfo = document.getElementById('variant-info');
+    const variantSku = document.getElementById('variant-sku');
+    const variantPrice = document.getElementById('variant-price');
+    const variantStock = document.getElementById('variant-stock');
+    const variantIdInput = document.getElementById('variant-id');
+    const addToCartBtn = document.getElementById('add-to-cart-btn');
+    const qtyInput = document.getElementById('qty');
+
+    function updateVariant() {
+      const selectedSize = sizeSelect ? sizeSelect.value : '';
+      const selectedColor = colorSelect ? colorSelect.value : '';
+      
+      // Намери съвпадащия вариант
+      const matchingVariant = variants.find(v => 
+        (v.size === selectedSize || (!selectedSize && !v.size)) &&
+        (v.color === selectedColor || (!selectedColor && !v.color))
+      );
+
+      if (matchingVariant) {
+        // Покажи информацията за варианта
+        variantSku.textContent = matchingVariant.sku;
+        variantPrice.textContent = matchingVariant.price;
+        variantStock.textContent = matchingVariant.stock;
+        variantIdInput.value = matchingVariant.id;
+        variantInfo.style.display = 'block';
+        
+        // Обнови максималното количество
+        qtyInput.max = matchingVariant.stock;
+        if (parseInt(qtyInput.value) > matchingVariant.stock) {
+          qtyInput.value = Math.max(1, matchingVariant.stock);
+        }
+        
+        // Обнови бутона
+        if (matchingVariant.stock > 0) {
+          addToCartBtn.disabled = false;
+          addToCartBtn.textContent = 'Добави в количката';
+        } else {
+          addToCartBtn.disabled = true;
+          addToCartBtn.textContent = 'Няма наличност';
+        }
+      } else {
+        // Скрий информацията за варианта
+        variantInfo.style.display = 'none';
+        variantIdInput.value = '';
+        addToCartBtn.disabled = true;
+        addToCartBtn.textContent = 'Изберете вариант';
+      }
+    }
+
+    // Добави слушатели за събитията
+    if (sizeSelect) {
+      sizeSelect.addEventListener('change', updateVariant);
+    }
+    if (colorSelect) {
+      colorSelect.addEventListener('change', updateVariant);
+    }
+
+    // Първоначално състояние
+    updateVariant();
+    {% endif %}
   </script>
 </article>
 {% endblock %}

@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Category, Product, ProductImage
+from .models import Category, Product, ProductImage, ProductVariant
 from django.forms.models import BaseInlineFormSet
 
 class MaxFiveInlineFormSet(BaseInlineFormSet):
@@ -31,6 +31,12 @@ class ProductImageInline(admin.TabularInline):
     readonly_fields = ('image_webp', 'image_avif')
     ordering = ('sort_order',)
 
+class ProductVariantInline(admin.TabularInline):
+    model = ProductVariant
+    extra = 1
+    fields = ('sku', 'size', 'color', 'price', 'stock')
+    ordering = ('sku',)
+
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
     prepopulated_fields = {"slug": ("name",)}
@@ -42,7 +48,7 @@ class ProductAdmin(admin.ModelAdmin):
     list_filter = ('active', 'category')
     search_fields = ('name', 'slug')
     prepopulated_fields = {"slug": ("name",)}
-    inlines = [ProductImageInline]
+    inlines = [ProductImageInline, ProductVariantInline]
     readonly_fields = ('image_webp', 'image_avif')
     fields = (
         'name', 'slug', 'category', 'description', 'price', 'old_price', 'stock', 'active',
