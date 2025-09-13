@@ -1,6 +1,6 @@
 from django.db import models
 from django.utils import timezone
-from catalog.models import Product  # ново
+from catalog.models import Product, ProductVariant
 
 class Order(models.Model):
     class Status(models.TextChoices):
@@ -31,7 +31,8 @@ class Order(models.Model):
 
 class OrderItem(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='items')
-    product = models.ForeignKey(Product, null=True, blank=True, on_delete=models.SET_NULL)  # ново
+    product = models.ForeignKey(Product, null=True, blank=True, on_delete=models.SET_NULL)
+    variant = models.ForeignKey(ProductVariant, null=True, blank=True, on_delete=models.SET_NULL)
     product_name = models.CharField(max_length=120)
     unit_price = models.DecimalField(max_digits=10, decimal_places=2)
     qty = models.PositiveIntegerField()

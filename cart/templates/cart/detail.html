@@ -38,22 +38,29 @@
       <tr>
         <td>
           <div class="prod">
-            {% if i.image_url %}
-              <img class="thumb" src="{{ i.image_url }}" alt="{{ i.name }}" loading="lazy" decoding="async" width="48" height="48">
-            {% endif %}
-            <a href="{% url 'product_detail' i.slug %}">{{ i.name }}</a>
+            {% comment %}Image will be added later when we get image_url from cart items{% endcomment %}
+            <div>
+              <a href="{% url 'product_detail' i.slug %}">{{ i.name }}</a>
+              {% if i.type == 'variant' and i.size or i.color or i.sku %}
+                <div style="font-size:0.85em;color:rgba(255,255,255,0.7);margin-top:0.25rem;">
+                  {% if i.sku %}<span>SKU: {{ i.sku }}</span>{% endif %}
+                  {% if i.size %}<span>{% if i.sku %} • {% endif %}Размер: {{ i.size }}</span>{% endif %}
+                  {% if i.color %}<span>{% if i.size or i.sku %} • {% endif %}Цвят: {{ i.color }}</span>{% endif %}
+                </div>
+              {% endif %}
+            </div>
           </div>
         </td>
         <td>{{ i.price }} лв</td>
         <td>
-          <form action="{% url 'cart_update' i.id %}" method="post" class="qty-form">
+          <form action="{% url 'cart_update' i.cart_item_id %}" method="post" class="qty-form">
             {% csrf_token %}
             <input class="qty-input" type="number" name="qty" value="{{ i.qty }}" min="0" step="1">
           </form>
         </td>
         <td>{{ i.line_total }} лв</td>
         <td>
-          <form action="{% url 'cart_remove' i.id %}" method="post">
+          <form action="{% url 'cart_remove' i.cart_item_id %}" method="post">
             {% csrf_token %}
             <button type="submit" class="btn btn-danger">Премахни</button>
           </form>

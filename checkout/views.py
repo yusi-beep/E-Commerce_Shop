@@ -10,7 +10,7 @@ from django.template.loader import render_to_string
 from .models import Order, OrderItem, Coupon
 from .forms import CheckoutForm
 from cart.cart import Cart
-from catalog.models import Product
+from catalog.models import Product, ProductVariant
 
 # Stripe е опционален
 try:
@@ -60,9 +60,16 @@ def checkout_view(request):
                 line_items = []
                 for i in cart:
                     product_obj = Product.objects.filter(id=i['id']).first()
+                    variant_obj = None
+                    
+                    # Handle variant items
+                    if i.get('type') == 'variant' and i.get('variant_id'):
+                        variant_obj = ProductVariant.objects.filter(id=i['variant_id']).first()
+                    
                     OrderItem.objects.create(
                         order=order,
                         product=product_obj,
+                        variant=variant_obj,
                         product_name=i['name'],
                         unit_price=i['price'],
                         qty=i['qty'],
@@ -77,8 +84,13 @@ def checkout_view(request):
             # Ако е наложен платеж → без Stripe
             if payment_method == 'cod' or not settings.USE_STRIPE:
                 # намаляване на наличности
-                for it in order.items.select_related('product'):
-                    if it.product:
+                for it in order.items.select_related('product', 'variant'):
+                    if it.variant:
+                        # Reduce variant stock
+                        it.variant.stock = max(0, int(it.variant.stock) - int(it.qty))
+                        it.variant.save(update_fields=['stock'])
+                    elif it.product:
+                        # Reduce product stock (for items without variants)
                         it.product.stock = max(0, int(it.product.stock) - int(it.qty))
                         it.product.save(update_fields=['stock'])
 
@@ -172,8 +184,13 @@ def stripe_webhook(request):
         coupon_code = data.get('metadata', {}).get('coupon_code')
 
         if order_id:
-            for it in order.items.select_related('product'):
-                if it.product:
+            for it in order.items.select_related('product', 'variant'):
+                if it.variant:
+                    # Reduce variant stock
+                    it.variant.stock = max(0, int(it.variant.stock) - int(it.qty))
+                    it.variant.save(update_fields=['stock'])
+                elif it.product:
+                    # Reduce product stock (for items without variants)
                     it.product.stock = max(0, int(it.product.stock) - int(it.qty))
                     it.product.save(update_fields=['stock'])
             try:
