@@ -1,0 +1,77 @@
+Feature: Header branding & navbar enhancements
+
+Homepage logo button
+
+Allow admins to upload, replace, and delete a store logo image.
+
+Render the logo in the site header as a clickable button linking to the homepage (/).
+
+Support SVG/PNG (prefer SVG). Enforce max file size (e.g., 512 KB) and dimensions (e.g., ≤ 256×256 px for PNG).
+
+Store both original and a resized/optimized variant. Serve with proper caching headers.
+
+Include alt text (editable) for accessibility and SEO.
+
+Browser tab icon (favicon)
+
+Allow admins to upload a favicon (ICO/PNG/SVG). Generate and serve the following:
+
+favicon.ico (fallback), favicon.svg, 32×32 and 16×16 PNG.
+
+Apple Touch Icon (180×180), Android/manifest icons if PWA is enabled.
+
+Inject <link rel="icon"> and related <link> tags into <head> across all pages.
+
+Navbar integration
+
+Place Cart and Orders as navbar items (right-aligned). Each item shows:
+
+Cart: icon + item count badge (live-updated).
+
+Orders: icon + label; if authenticated, link to /account/orders; else link to sign-in.
+
+Navbar must be responsive (mobile: collapsible menu / hamburger).
+
+Expose a CSS class API (e.g., .navbar, .navbar-brand, .navbar-actions, .btn-icon, .badge) so design can be restyled via CSS only.
+
+Provide focus states, ARIA roles (role="navigation"), and keyboard navigation.
+
+Admin UI
+
+Settings page: Branding → fields:
+
+Site logo (upload/delete), alt text, max width (px), link target (default /).
+
+Favicon upload (auto-generate sizes).
+
+Show preview and “Reset to default” actions.
+
+Server-side validation + helpful error messages.
+
+Performance & accessibility
+
+Serve images with correct width/height, loading="eager" for logo, decoding="async".
+
+Use prefetch/preload for critical assets where appropriate.
+
+WCAG 2.1 AA: color contrast for navbar, visible focus outline.
+
+Lighthouse ≥ 90 for Performance/Best Practices/Accessibility on header route.
+
+Security & storage
+
+Validate MIME type and scan images.
+
+Store assets in the media bucket with unique names; purge CDN on change.
+
+Acceptance criteria
+
+Admin can upload/edit/delete logo; header updates immediately.
+
+Clicking the logo navigates to /.
+
+Favicon displays on all major browsers and devices.
+
+Cart & Orders appear in the navbar (desktop & mobile), styled via CSS only.
+
+No layout shift (CLS) introduced by header assets.
