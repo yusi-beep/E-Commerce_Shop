@@ -6,6 +6,38 @@ This is a Django-based e-commerce application for an online shop in Bulgarian. T
 
 Preferred communication style: Simple, everyday language.
 
+## Recent Enhancements (September 2025)
+
+### Product Descriptions
+- Added product description field to Product model with migration
+- Integrated descriptions into admin interface and product detail pages
+- Modern styled description display with card-based layout
+
+### Modern UI/UX Design
+- Upgraded color scheme from green to modern blue accent (#2563eb)
+- Enhanced product cards with gradients, shadows, and hover animations
+- Improved button styling with elevation effects and transitions
+- Better mobile responsiveness across all breakpoints
+
+### Product Variants System
+- Complete product variants functionality for size, color, and SKU management
+- Admin interface with ProductVariantInline for easy variant management
+- Frontend variant selectors with dynamic pricing and stock updates
+- Backend cart integration supporting variant-specific pricing and inventory
+- Checkout process updated to handle variant orders and stock reduction
+
+### Enhanced Image Gallery
+- Improved gallery styling with better hover effects and transitions
+- Enhanced mobile responsiveness with horizontal scrolling thumbnails
+- Modern card-based gallery presentation with shadows and borders
+- Optimized thumbnail sizing and spacing
+
+### Cart System Improvements
+- Upgraded cart structure to support product variants
+- Dynamic pricing based on selected variant
+- Variant information display in cart (size, color, SKU)
+- Stock validation per variant during add-to-cart operations
+
 ## System Architecture
 
 ### Backend Framework
